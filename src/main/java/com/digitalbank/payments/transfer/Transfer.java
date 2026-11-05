@@ -15,7 +15,8 @@ public class Transfer {
     private String destinationIban;
     private BigDecimal amount;
     private String currency;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TransferStatus status;
     private String reference;
     private Instant createdAt = Instant.now();
 
@@ -23,7 +24,7 @@ public class Transfer {
 
     public Transfer(UUID customerId, String idempotencyKey, String sourceIban,
                     String destinationIban, BigDecimal amount, String currency,
-                    String status, String reference) {
+                    TransferStatus status, String reference) {
         this.customerId = customerId;
         this.idempotencyKey = idempotencyKey;
         this.sourceIban = sourceIban;
@@ -35,10 +36,12 @@ public class Transfer {
     }
 
     public UUID getId() { return id; }
+    public UUID getCustomerId() { return customerId; }
     public String getSourceIban() { return sourceIban; }
     public String getDestinationIban() { return destinationIban; }
     public BigDecimal getAmount() { return amount; }
     public String getCurrency() { return currency; }
-    public String getStatus() { return status; }
+    public TransferStatus getStatus() { return status; }
     public String getReference() { return reference; }
+    public Instant getCreatedAt() { return createdAt; }
 }

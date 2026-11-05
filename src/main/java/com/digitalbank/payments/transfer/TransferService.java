@@ -61,7 +61,7 @@ public class TransferService {
         to.credit(req.amount());
 
         Transfer saved = transfers.save(new Transfer(customerId, key, src, dst,
-                req.amount(), from.getCurrency(), "COMPLETED", req.reference()));
+                req.amount(), from.getCurrency(), TransferStatus.COMPLETED, req.reference()));
         return Response.from(saved);
     }
 

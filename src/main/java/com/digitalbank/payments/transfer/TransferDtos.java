@@ -2,6 +2,7 @@ package com.digitalbank.payments.transfer;
 
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 public final class TransferDtos {
@@ -13,12 +14,13 @@ public final class TransferDtos {
             @NotNull @DecimalMin("0.01") @Digits(integer = 17, fraction = 2) BigDecimal amount,
             @Size(max = 140) String reference) {}
 
-    public record Response(UUID id, String status, String sourceIban,
+    public record Response(UUID id, TransferStatus status, String sourceIban,
                            String destinationIban, BigDecimal amount,
-                           String currency, String reference) {
+                           String currency, String reference, Instant createdAt) {
         static Response from(Transfer t) {
             return new Response(t.getId(), t.getStatus(), t.getSourceIban(),
-                    t.getDestinationIban(), t.getAmount(), t.getCurrency(), t.getReference());
+                    t.getDestinationIban(), t.getAmount(), t.getCurrency(),
+                    t.getReference(), t.getCreatedAt());
         }
     }
 }

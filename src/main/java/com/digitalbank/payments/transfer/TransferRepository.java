@@ -5,4 +5,10 @@ import java.util.*;
 
 public interface TransferRepository extends JpaRepository<Transfer, UUID> {
     Optional<Transfer> findByCustomerIdAndIdempotencyKey(UUID customerId, String idempotencyKey);
+
+    // Filtering by customerId in the query is what stops one customer
+    // from reading another customer's transfer.
+    Optional<Transfer> findByIdAndCustomerId(UUID id, UUID customerId);
+
+    List<Transfer> findTop50ByCustomerIdOrderByCreatedAtDesc(UUID customerId);
 }

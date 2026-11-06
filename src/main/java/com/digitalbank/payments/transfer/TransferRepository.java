@@ -1,6 +1,8 @@
 package com.digitalbank.payments.transfer;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import java.util.*;
 
 public interface TransferRepository extends JpaRepository<Transfer, UUID> {
@@ -11,4 +13,9 @@ public interface TransferRepository extends JpaRepository<Transfer, UUID> {
     List<Transfer> findTop50ByCustomerIdOrderByCreatedAtDesc(UUID customerId);
 
     List<Transfer> findByTypeAndStatus(TransferType type, TransferStatus status);
+
+    // Locks the transfer row so two processes can never settle the same transfer.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from Transfer t where t.id = :id")
+    Optional<Transfer> lockById(@Param("id") UUID id);
 }

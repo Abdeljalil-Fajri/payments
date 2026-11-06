@@ -1,21 +1,32 @@
 package com.digitalbank.payments.transfer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
 // SIMULATION: in production this would be replaced by a real SEPA clearing integration.
 @Component
 public class SepaSettlementJob {
-    private final TransferRepository transfers;
+    private static final Logger log = LoggerFactory.getLogger(SepaSettlementJob.class);
 
-    public SepaSettlementJob(TransferRepository transfers) { this.transfers = transfers; }
+    private final TransferRepository transfers;
+    private final SepaSettlementService settlement;
+
+    public SepaSettlementJob(TransferRepository transfers, SepaSettlementService settlement) {
+        this.transfers = transfers;
+        this.settlement = settlement;
+    }
 
     @Scheduled(fixedDelay = 30000)
-    @Transactional
     public void settle() {
-        List<Transfer> pending = transfers.findByTypeAndStatus(TransferType.SEPA, TransferStatus.PENDING);
-        pending.forEach(Transfer::markCompleted);
+        for (Transfer t : transfers.findByTypeAndStatus(TransferType.SEPA, TransferStatus.PENDING)) {
+            try {
+                settlement.settleOne(t.getId());
+            } catch (Exception e) {
+                // The transfer stays PENDING and is retried at the next run. No IBAN in logs.
+                log.error("Settlement failed for transfer {}", t.getId(), e);
+            }
+        }
     }
 }

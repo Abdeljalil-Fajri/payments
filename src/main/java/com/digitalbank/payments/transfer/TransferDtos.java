@@ -14,13 +14,15 @@ public final class TransferDtos {
             @NotNull @DecimalMin("0.01") @Digits(integer = 17, fraction = 2) BigDecimal amount,
             @Size(max = 140) String reference) {}
 
-    public record Response(UUID id, TransferStatus status, String sourceIban,
-                           String destinationIban, BigDecimal amount,
-                           String currency, String reference, Instant createdAt) {
+    public record Response(UUID id, TransferStatus status, TransferType type,
+                           String sourceIban, String destinationIban,
+                           BigDecimal amount, String currency, String reference,
+                           String failureReason, Instant createdAt) {
         static Response from(Transfer t) {
-            return new Response(t.getId(), t.getStatus(), t.getSourceIban(),
-                    t.getDestinationIban(), t.getAmount(), t.getCurrency(),
-                    t.getReference(), t.getCreatedAt());
+            return new Response(t.getId(), t.getStatus(), t.getType(),
+                    t.getSourceIban(), t.getDestinationIban(), t.getAmount(),
+                    t.getCurrency(), t.getReference(), t.getFailureReason(),
+                    t.getCreatedAt());
         }
     }
 }

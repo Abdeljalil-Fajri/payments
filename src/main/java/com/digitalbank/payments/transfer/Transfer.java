@@ -20,6 +20,7 @@ public class Transfer {
     @Enumerated(EnumType.STRING)
     private TransferType type;
     private String reference;
+    private String failureReason;
     private Instant createdAt = Instant.now();
 
     protected Transfer() {}
@@ -46,7 +47,23 @@ public class Transfer {
         this.type = type;
     }
 
-    public void markCompleted() { this.status = TransferStatus.COMPLETED; }
+    // Only a PENDING transfer can change state, and only once.
+    public void markCompleted() {
+        requirePending();
+        this.status = TransferStatus.COMPLETED;
+    }
+
+    public void markFailed(String reason) {
+        requirePending();
+        this.status = TransferStatus.FAILED;
+        this.failureReason = reason;
+    }
+
+    private void requirePending() {
+        if (status != TransferStatus.PENDING) {
+            throw new IllegalStateException("Transfer is not PENDING");
+        }
+    }
 
     public UUID getId() { return id; }
     public UUID getCustomerId() { return customerId; }
@@ -57,5 +74,6 @@ public class Transfer {
     public TransferStatus getStatus() { return status; }
     public TransferType getType() { return type; }
     public String getReference() { return reference; }
+    public String getFailureReason() { return failureReason; }
     public Instant getCreatedAt() { return createdAt; }
 }

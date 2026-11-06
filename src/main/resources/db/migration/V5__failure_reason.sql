@@ -1,0 +1,1 @@
+ALTER TABLE transfers ADD COLUMN failure_reason VARCHAR(100);

@@ -17,14 +17,24 @@ public class Transfer {
     private String currency;
     @Enumerated(EnumType.STRING)
     private TransferStatus status;
+    @Enumerated(EnumType.STRING)
+    private TransferType type;
     private String reference;
     private Instant createdAt = Instant.now();
 
     protected Transfer() {}
 
+    // Used by internal transfers (DBP-22): type defaults to INTERNAL.
     public Transfer(UUID customerId, String idempotencyKey, String sourceIban,
                     String destinationIban, BigDecimal amount, String currency,
                     TransferStatus status, String reference) {
+        this(customerId, idempotencyKey, sourceIban, destinationIban, amount,
+                currency, status, reference, TransferType.INTERNAL);
+    }
+
+    public Transfer(UUID customerId, String idempotencyKey, String sourceIban,
+                    String destinationIban, BigDecimal amount, String currency,
+                    TransferStatus status, String reference, TransferType type) {
         this.customerId = customerId;
         this.idempotencyKey = idempotencyKey;
         this.sourceIban = sourceIban;
@@ -33,7 +43,10 @@ public class Transfer {
         this.currency = currency;
         this.status = status;
         this.reference = reference;
+        this.type = type;
     }
+
+    public void markCompleted() { this.status = TransferStatus.COMPLETED; }
 
     public UUID getId() { return id; }
     public UUID getCustomerId() { return customerId; }
@@ -42,6 +55,7 @@ public class Transfer {
     public BigDecimal getAmount() { return amount; }
     public String getCurrency() { return currency; }
     public TransferStatus getStatus() { return status; }
+    public TransferType getType() { return type; }
     public String getReference() { return reference; }
     public Instant getCreatedAt() { return createdAt; }
 }

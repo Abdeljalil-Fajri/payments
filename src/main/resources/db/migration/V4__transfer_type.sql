@@ -1,0 +1,3 @@
+ALTER TABLE transfers ADD COLUMN type VARCHAR(20) NOT NULL DEFAULT 'INTERNAL';
+ALTER TABLE transfers ADD CONSTRAINT transfers_type_check
+    CHECK (type IN ('INTERNAL', 'SEPA', 'INSTANT'));

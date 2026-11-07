@@ -9,6 +9,8 @@ RUN mvn -q package -DskipTests
 
 # ---- Stage 2: small runtime image ----
 FROM eclipse-temurin:21-jre
+# Apply OS security patches (fixes apt CVE-2026-109518)
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 # Never run as root inside the container
 RUN groupadd -r app && useradd -r -g app app
 WORKDIR /app

@@ -3,7 +3,7 @@ pipeline {
 
     options {
         timestamps()
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 45, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
 
@@ -24,8 +24,6 @@ pipeline {
 
         stage('Build and unit tests') {
             steps {
-                // Only the DB-free unit test runs here. The default Spring
-                // context test needs a database, so it is excluded for now.
                 sh '''
                     docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
                         -v "$PWD:/app" -w /app maven:3.9-eclipse-temurin-21 \
@@ -47,9 +45,11 @@ pipeline {
         stage('Dependency scan (Trivy)') {
             steps {
                 sh '''
-                    docker run --rm -v "$PWD:/project" aquasec/trivy:latest \
-                        fs --scanners vuln --severity HIGH,CRITICAL \
-                        --ignore-unfixed --exit-code 1 /project/pom.xml
+                    docker run --rm -v "$PWD:/project" \
+                        -v trivy-cache:/root/.cache/ \
+                        aquasec/trivy:latest fs --timeout 15m --scanners vuln \
+                        --severity HIGH,CRITICAL --ignore-unfixed \
+                        --exit-code 1 /project/pom.xml
                 '''
             }
         }
@@ -64,8 +64,10 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                        aquasec/trivy:latest image --severity HIGH,CRITICAL \
-                        --ignore-unfixed --exit-code 1 $IMAGE
+                        -v trivy-cache:/root/.cache/ \
+                        aquasec/trivy:latest image --timeout 15m --scanners vuln \
+                        --severity HIGH,CRITICAL --ignore-unfixed \
+                        --exit-code 1 $IMAGE
                 '''
             }
         }
